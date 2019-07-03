@@ -40,18 +40,41 @@ def concatenate_dictionary_values(*dictionaries):
         output += list(this_dictionary.values())
     return output
 
+def plot_expenditures(output, ylim=(0, 3500)):
+    """
+    """
+    plt.figure()
+    for name, array in output.items():
+        if "expenditure" in name:
+            plt.plot(array[:, 0], array[:, 1], label=name)
+    plt.legend()
+    # plt.yscale("log")
+    plt.ylim(ylim)
+    plt.grid(True)
+    plt.show()
+
+def plot_accounts(output):
+    """
+    """
+    plt.figure()
+    for name, array in output.items():
+        if "expenditure" not in name:
+            plt.plot(array[:, 0], array[:, 1], label=name)
+
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+
+
 def get_results(some_model, duration):
     """
     dff
     """
     output = some_model.some_steps(duration)
 
-    plt.figure()
-    for name, array in output.items():
-        plt.plot(array[:, 0], array[:, 1], label=name)
-    plt.legend()
-    plt.grid(True)
-    plt.show()
+    plot_accounts(output)
+    plot_expenditures(output)
+
 
     print()
     print("--------------")
@@ -70,6 +93,7 @@ def get_results(some_model, duration):
 
     print()
     print("net worth: {}".format(int(some_model.net_worth())))
+    return output
 
 
 def sequencer(x, f, n):

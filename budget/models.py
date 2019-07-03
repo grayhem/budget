@@ -19,16 +19,21 @@ class Modeler(object):
         self.dynamics = dynamics
         self.loans = [d for d in self.dynamics if isinstance(d, accounts.Loan)]
 
+
     def step(self):
         """
         run one month of the sim
         """
         expenditure_this_month = 0
+        installment_this_month = 0
         for this_day in self.days:
             for this_dynamic in self.dynamics:
-                expenditure_this_month += this_dynamic(self.month, this_day)
+                this_paid_amount = this_dynamic(self.month, this_day)
+                expenditure_this_month += this_paid_amount
+                if isinstance(this_dynamic, accounts.Loan):
+                    installment_this_month += this_paid_amount
         self.month += 1
-        return expenditure_this_month
+        return expenditure_this_month, installment_this_month
 
     def some_steps(self, months):
         """
@@ -36,18 +41,23 @@ class Modeler(object):
         """
         output = {}
         output["monthly expenditure"] = []
+        output["installment expenditure"] = []
         for this_account in self.statics:
             output[this_account.name] = []
 
         for this_month in range(months):
             # uughhhh i feel dirty
-            output["monthly expenditure"].append((this_month, self.step()))
+            total_this_month, installment_this_month = self.step()
+            output["monthly expenditure"].append((this_month, total_this_month))
+            output['installment expenditure'].append((this_month, installment_this_month))
+
             for this_account in self.statics:
                 output[this_account.name].append((this_month, this_account.balance))
 
         for this_account_name in output.keys():
             output[this_account_name] = np.vstack(output[this_account_name])
         output["monthly expenditure"] = np.vstack(output["monthly expenditure"])
+        output["installment expenditure"] = np.vstack(output["installment expenditure"])
 
         return output
 
